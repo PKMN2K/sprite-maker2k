@@ -6,6 +6,23 @@ export const GENERATION_PRESETS: Record<Exclude<GenerationQuality, "custom">, Pi
   high: { width: 256, height: 256, frames: 12, fps: 12, minFrames: 12, maxFrames: 16 },
 };
 
+/** Native Crystal trainer still-image profile; preserves the selected image provider. */
+export function crystalTrainerProfile(current: ChatGenerationProfile): ChatGenerationProfile {
+  return normalizeGenerationProfile({
+    ...current,
+    quality: "custom",
+    width: 56,
+    height: 56,
+    frameMode: "fixed",
+    frames: 1,
+    minFrames: 1,
+    maxFrames: 1,
+    fps: 1,
+    allowInterpolation: false,
+    allowAutoAdjust: false,
+  });
+}
+
 export const SLASH_COMMANDS: { id: SpriteSlashCommand; label: string; description: string }[] = [
   { id: "animate", label: "/animate", description: "Generate a looping animation using this chat's frame settings" },
   { id: "rig", label: "/rig", description: "Ask the AI to place rig points and poses on a sprite; review and render in the Rig tab" },
