@@ -4,6 +4,7 @@
   import { revealItemInDir } from "@tauri-apps/plugin-opener";
   import { api, assetUrl } from "$lib/api";
   import FacingPanel from "$lib/components/FacingPanel.svelte";
+  import CrystalTrainerCheck from "$lib/components/CrystalTrainerCheck.svelte";
   import PromoteAnchorDialog from "$lib/components/PromoteAnchorDialog.svelte";
   import { confirmAndDeleteAsset } from "$lib/asset-removal";
   import { errorMessage, type Animation, type Asset, type AssetVersion, type CharacterAnchorSummary, type CharacterProfile } from "$lib/types";
@@ -109,6 +110,7 @@
       </div>
     </section>
     <section><h3>FILE</h3><dl><div><dt>Dimensions</dt><dd>{asset.width} × {asset.height} px</dd></div><div><dt>Format</dt><dd>{asset.format.toUpperCase()}</dd></div><div><dt>Size</dt><dd>{formatBytes(asset.fileSize)}</dd></div><div><dt>Transparency</dt><dd>{asset.hasAlpha ? "Alpha channel" : "Opaque"}</dd></div></dl></section>
+    <CrystalTrainerCheck {asset} />
     <section><h3>LOCATION</h3><p class="path">{asset.relativePath}</p><button class="wide" onclick={() => revealItemInDir(asset.path)}><ExternalLink size={12} /> Reveal on disk</button></section>
     <section><h3>PIPELINE</h3><button class="wide anchor" onclick={() => promoteDialogOpen = true} disabled={busy}><Anchor size={12} /> Set as character anchor</button>
       {#if anchorSummary?.facing}<p class="facing-badge">Facing <strong>{anchorSummary.facing?.toUpperCase()}</strong>{#if anchorSummary.facingStatus} · {anchorSummary.facingStatus}{/if}{#if anchorSummary.facingConfidence} · {Math.round(anchorSummary.facingConfidence * 100)}%{/if}</p>{/if}
