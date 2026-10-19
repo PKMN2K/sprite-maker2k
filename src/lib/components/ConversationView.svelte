@@ -10,6 +10,7 @@
   import MarkdownMessage from "$lib/components/MarkdownMessage.svelte";
   import ProviderLogo from "$lib/components/ProviderLogo.svelte";
   import { SLASH_COMMANDS } from "$lib/generation-profiles";
+  import { youngsterReferencePrompt } from "$lib/crystal-youngster-prompt";
   import { type ConversationStyleId, type StylePresetId } from "$lib/style-presets";
   import type { CustomArtStyle, CustomSkill } from "$lib/library-types";
   import { errorMessage, studioErrorCode, type Animation, type AnimationPolishMode, type Asset, type AssetPack, type ChatGenerationProfile, type Conversation, type Message, type ProviderStatus, type ReferenceImage, type SpriteGenerationMetadata } from "$lib/types";
@@ -166,6 +167,12 @@
     try { await onAttachReferenceFiles(files); } finally { attaching = false; }
   }
 
+  function draftCrystalYoungster() {
+    if (activeReferences.length < 2) return;
+    prompt = youngsterReferencePrompt(activeReferences);
+    requestAnimationFrame(() => textarea?.focus());
+  }
+
   function chooseCommand(label: string) {
     if (refining) return;
     prompt = `${label} `;
@@ -288,7 +295,7 @@
     <div class="composer" class:disabled={!["ready","detected"].includes(provider?.status ?? "")} class:refining>
       {#if activeReferences.length}<div class="attached-images">{#each activeReferences as reference}<div class="attached-image" class:focused={reference.id===focusedReferenceId}><img src={assetUrl(reference.path)} alt={reference.name}/><span>{reference.id===focusedReferenceId?`Focused · ${reference.name}`:reference.name}</span><button class="focus" class:active={reference.id===focusedReferenceId} onclick={()=>onFocusReference(reference.id===focusedReferenceId?undefined:reference.id)} title={reference.id===focusedReferenceId?"Clear reference focus":"Focus this reference"}>{#if reference.id===focusedReferenceId}<Unlock size={10}/>{:else}<Crosshair size={10}/>{/if}</button><button class="remove" onclick={()=>onRemoveReference(reference.id)} title="Remove reference from this chat" aria-label={`Remove ${reference.name}`}><X size={11}/></button></div>{/each}</div>{/if}
       <textarea bind:this={textarea} bind:value={prompt} onkeydown={keydown} onpaste={paste} rows="2" readonly={refining} disabled={!conversation || refining || !["ready","detected"].includes(provider?.status ?? "")} placeholder={refining ? "Refining prompt in English…" : ["ready","detected"].includes(provider?.status ?? "") ? "Ask for a sprite, paste an image, or type / for commands…" : "Open Settings to install or sign in to this provider"}></textarea>
-      <div class="composer-footer"><div class="composer-hints"><button class="attach" onclick={uploadReferences} disabled={!conversation || attaching || refining} title="Attach reference images"><Paperclip size={14}/></button><button class="attach refine" class:refining onclick={refinePrompt} disabled={!conversation || (!refining && (!prompt.trim() || sending)) || !["ready","detected"].includes(provider?.status ?? "")} title={refining ? "Cancel prompt refinement" : "Translate and refine the draft in English for precise generation"}>{#if refining}<Square size={12} fill="currentColor"/>{:else}<Languages size={14}/>{/if}</button><span>{refining?"Refining prompt… click again to cancel":attaching?"Adding image…":"Paste, refine, or attach a reference"}</span></div>
+      <div class="composer-footer"><div class="composer-hints">{#if conversationStyle === "crystal-trainer" || workspaceStyle === "crystal-trainer"}<button class="attach" onclick={draftCrystalYoungster} disabled={!conversation || activeReferences.length < 2 || refining || generationActive} title="Draft a real /sprite request using two attached references">Youngster prompt</button>{/if}<button class="attach" onclick={uploadReferences} disabled={!conversation || attaching || refining} title="Attach reference images"><Paperclip size={14}/></button><button class="attach refine" class:refining onclick={refinePrompt} disabled={!conversation || (!refining && (!prompt.trim() || sending)) || !["ready","detected"].includes(provider?.status ?? "")} title={refining ? "Cancel prompt refinement" : "Translate and refine the draft in English for precise generation"}>{#if refining}<Square size={12} fill="currentColor"/>{:else}<Languages size={14}/>{/if}</button><span>{refining?"Refining prompt… click again to cancel":attaching?"Adding image…":"Paste, refine, or attach a reference"}</span></div>
         {#if canStopGeneration}<button class="stop" onclick={onCancel} title="Stop request"><Square size={12} fill="currentColor" /></button>{:else}<button class="send" onclick={send} disabled={!prompt.trim() || !conversation || refining || !["ready","detected"].includes(provider?.status ?? "") || sending || generationActive} title="Send message"><ArrowUp size={15} /></button>{/if}
       </div>
     </div>
