@@ -13,6 +13,13 @@ export type StylePreset = {
 
 export const STYLE_PRESETS: StylePreset[] = [
   {
+    id: "crystal-trainer",
+    name: "Crystal trainer (4 shades)",
+    description: "56×56 battle portrait, four opaque shades, crisp hand-placed clusters",
+    thumbnail: "/style-presets/limited-palette.svg",
+    prompt: "Handcrafted 56×56 pixel-art battle trainer sprite on transparent background. Exactly four or fewer opaque tones including black and white (two intermediate gray shades); transparency is separate. Preserve the identity reference's distinct pose, clothes, and expression; use additional references only for pixel technique, not their character identities. Tight 1-pixel contour clusters, strong silhouette, sparse deliberate dithering, hard edges, no gradients, antialiasing or rescaled smoothing. Upper-left key lighting, selective connected shadows and highlights. Output a single 56×56 PNG with readable anatomy at native resolution, not a zoomed illustration.",
+  },
+  {
     id: "pixel-rpg",
     name: "Pixel RPG",
     description: "Crisp clusters, warm palette, compact game scale",
