@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { normalizeGenerationProfile, profileForQuality } from "$lib/generation-profiles";
+  import { crystalTrainerProfile, normalizeGenerationProfile, profileForQuality } from "$lib/generation-profiles";
   import type { ChatGenerationProfile, GenerationQuality, ProviderStatus } from "$lib/types";
 
   let { profile, provider, imageProviders = [], compact = false, disabled = false, onChange }: {
@@ -38,6 +38,8 @@
     {/each}
   </div>
 
+  <button type="button" class="crystal-profile" disabled={disabled} onclick={() => commit(crystalTrainerProfile(profile))}>Crystal Trainer · 56×56 · 1 frame</button>
+
   <div class="frame-policy">
     <div><strong>Frames</strong>{#if !compact}<span>{profile.frameMode === "auto" ? "AI uses the smallest count that keeps the motion clear" : "Use an exact count you choose"}</span>{/if}</div>
     <div class="segmented" aria-label="Frame policy">
@@ -69,6 +71,7 @@
 </div>
 
 <style>
+  .crystal-profile{width:100%;margin-top:9px;padding:9px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);color:var(--text);font:inherit;font-size:11px;font-weight:650;cursor:pointer;text-align:left}.crystal-profile:hover:not(:disabled){border-color:var(--accent);background:var(--accent-dim)}.crystal-profile:disabled{opacity:.55;cursor:default}
   .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.preset-grid button{min-width:0;height:54px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--muted);text-align:left;padding:7px 8px;cursor:pointer}.preset-grid button:hover:not(:disabled){border-color:var(--border-strong);color:var(--text)}.preset-grid button.active{border-color:var(--accent);background:var(--accent-dim);color:var(--text)}.preset-grid button:disabled{opacity:.55;cursor:default}.preset-grid strong,.preset-grid span{display:block}.preset-grid strong{font-size:11px}.preset-grid span{font-size:9px;color:var(--faint);margin-top:4px;white-space:nowrap}
   .frame-policy{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:13px;border-top:1px solid var(--border)}.frame-policy>div:first-child strong,.frame-policy>div:first-child span{display:block}.frame-policy>div:first-child strong{font-size:11px}.frame-policy>div:first-child span{font-size:10px;color:var(--faint);margin-top:3px}.segmented{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px}.segmented button{height:25px;min-width:53px;border:0;border-radius:4px;background:transparent;color:var(--faint);font:inherit;font-size:10px;cursor:pointer}.segmented button.active{background:var(--surface-hover);color:var(--text);box-shadow:0 0 0 1px var(--border-strong)}.segmented button:disabled{opacity:.55;cursor:default}
   .fields{display:grid;gap:8px}.fields.dimensions{grid-template-columns:repeat(3,1fr);margin-top:12px}.fields.fixed-count{grid-template-columns:1fr;margin-top:8px}.fields.two{grid-template-columns:1.45fr 1fr;margin-top:10px}.fields.two.auto-range{grid-template-columns:repeat(2,1fr)}.fields label{min-width:0;font-size:10px;color:var(--faint)}input,select{display:block;width:100%;height:31px;margin-top:5px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);font:inherit;font-size:11px;padding:0 7px;outline:0}input:focus,select:focus{border-color:var(--accent)}select:disabled,input:disabled{opacity:.55}
