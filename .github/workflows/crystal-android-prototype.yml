@@ -1,0 +1,59 @@
+name: Crystal Android Prototype
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/crystal-sprite-generator]
+    paths:
+      - '.github/workflows/crystal-android-prototype.yml'
+      - 'src-tauri/tauri.android.conf.json'
+permissions:
+  contents: read
+jobs:
+  android-prototype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - name: Android SDK and NDK
+        uses: android-actions/setup-android@v3
+      - name: Install NDK and platform
+        shell: bash
+        run: |
+          sdkmanager --install "ndk;27.2.12479018" "platforms;android-35" "build-tools;35.0.0"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+      - name: Dependencies
+        run: bun install --frozen-lockfile
+      - name: Initialize Android project on CI runner
+        run: bunx tauri android init --ci
+      - name: Attempt Android debug APK
+        id: apk
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          bunx tauri android build --debug --apk --target aarch64 --config src-tauri/tauri.android.conf.json 2>&1 | tee android-build.log
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crystal-android-build-log
+          path: android-build.log
+          if-no-files-found: warn
+      - name: Upload APK only if actually generated
+        if: success() || steps.apk.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: crystal-android-experimental-apk
+          path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: ignore
+      - name: Report failure accurately
+        if: steps.apk.outcome == 'failure'
+        run: |
+          echo "Android packaging failed. Review build log before attempting installation." >&2
+          exit 1
