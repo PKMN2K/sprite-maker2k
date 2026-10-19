@@ -1,0 +1,44 @@
+name: Crystal Sprite Studio Checks
+on:
+  push:
+    branches:
+      - feature/crystal-sprite-generator
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: bun run build
+  crystal-validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=10,<13'
+      - name: Exercise strict PNG acceptance and rejection
+        run: |
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          p=Path('/tmp/crystal_good.png')
+          img=Image.new('RGBA',(56,56),(0,0,0,0))
+          img.putpixel((20,20),(0,0,0,255))
+          img.putpixel((21,20),(85,85,85,255))
+          img.putpixel((22,20),(170,170,170,255))
+          img.putpixel((23,20),(255,255,255,255))
+          img.save(p)
+          Image.new('RGBA',(64,64),(0,0,0,255)).save('/tmp/crystal_bad.png')
+          PY
+          python tools/crystal_trainer_validate.py /tmp/crystal_good.png
+          if python tools/crystal_trainer_validate.py /tmp/crystal_bad.png; then
+            echo "Validator incorrectly accepted invalid sprite" >&2
+            exit 1
+          fi
